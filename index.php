@@ -1,5 +1,7 @@
 <?php
 
+require 'senator.php';
+
 function formatAddressWithState($address, $city, $zipCode) {
     // Construct the full address string
     $fullAddress = "$address, $city, $zipCode";
@@ -10,12 +12,27 @@ function formatAddressWithState($address, $city, $zipCode) {
     return $formattedAddress;
 }
 
-// Define the file to store submissions
-require 'senator.php'; // Include the senators.php file
+// Function to validate the form
+function validateForm($address, $city,$zipCode) {
 
-// Initialize variables
-$errors = [];
-$success = "";
+    $errors = [];
+
+    if (empty($address)) {
+        $errors['address'] = "Address is required.";
+    }
+
+    if(empty($city)) {
+        $errors['city'] = "City is required.";
+    }
+
+    if(empty($zipCode) || !ctype_digit($zipCode)) {
+        $errors['zipCode'] = "Valid Zipcode is required.";
+    }
+
+    return $errors;
+}
+
+
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -23,60 +40,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $city = trim($_POST["city"]);
     $zipcode = trim($_POST["zipcode"]);
 
-    // Validation
-    if (empty($street_address)) {
-        $errors["street-address"] = "Street address is required.";
-    }
-    if (empty($city)) {
-        $errors['city'] = "City is required.";
-    }
-    if (empty($zipcode) || !ctype_digit($zipcode)) {
-        $errors['zipcode'] = "Valid Zipcode is required.";
-    }
-
-    // If no errors, store the data
+    // Validate the form
+    $errors = validateForm($street_address, $city, $zipcode);
+    
     if (empty($errors)) {
+
         $options = [
         'address' => formatAddressWithState($street_address,$city,$zipcode),
         "levels" =>  [
         "administrativeArea1"
         ],
-      "roles" =>  [
+        "roles" =>  [
         "legislatorUpperBody",
         "legislatorLowerBody"
-      ]
-    ];
-        //   "address": "1231 main street atlanta 30339"
+        ]
+        ];
 
-
-        // $address = urlencode("$street_address $city $zipcode");
-
-    //       $address = [
-    //     'address' => $street_address,
-    //     'city' => $city,
-    //     // 'state' => 'GA', 
-    //     'zip' => $zipcode
-    // ];
-
-        // $address = urlencode("$street_address $city $zipcode");
-
-    // Prepare the options array for the API call
-    // $optParams = ['address' => $address];
-
-
-        
-        // Call the function to get senators and representatives
         $officials = getSenatorsAndRepresentatives($options);
-        // $senators = $officials['senators'];
-        // $representatives = $officials['representatives'];
-
         $senators = $officials;
-
-        // dump here
-        // var_dump($officials);
-
-        // Clear input values after successful submission
-        // $street_address = $city = $zipcode = "";
     }
 }
 
@@ -139,9 +120,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label for="street-address" class="block mb-2 font-bold">Street Address</label>
                             <input type="text" id="street-address" name="street-address"  class="w-full px-3 py-2 border border-gray-300 rounded-md"
                             value="<?= $street_address ?? "" ?>">
-                            <?php if (!empty($errors)): ?>
+                            <?php if (isset($errors['address'])): ?>
                                 <p class="mt-1 text-red-500 text-sm">
-                                    <?= $errors["street-address"] ?>
+                                    <?= $errors["address"] ?>
                                 </p>
 
                             <?php endif; ?>
@@ -152,12 +133,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label for="city" class="block mb-2 font-bold">City</label>
                             <input type="text" id="city" name="city"  class="w-full px-3 py-2 border border-gray-300 rounded-md"
                             value="<?= $city ?? "" ?>">
+
+                            <?php if (isset($errors['city'])): ?>
+                                <p class="mt-1 text-red-500 text-sm">
+                                    <?= $errors["city"] ?>
+                                </p>
+
+                            <?php endif; ?>
                             
                         </div>
                         <div class="mb-4">
                             <label for="zipcode" class="block mb-2 font-bold">Zipcode</label>
                             <input type="text" id="zipcode" name="zipcode"  class="w-full px-3 py-2 border border-gray-300 rounded-md"
                             value="<?= $zipcode ?? "" ?>">
+                            <?php if (isset($errors['zipCode'])): ?>
+                                <p class="mt-1 text-red-500 text-sm">
+                                    <?= $errors["zipCode"] ?>
+                                </p>
+                            <?php endif; ?>
+                            
                         </div>
                     </div>
                     <button type="submit" class="w-full md:w-auto bg-blue-600 text-white px-8 py-3 rounded-md font-bold hover:bg-blue-700 transition">
@@ -168,43 +162,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </section>
 
 
-<!--     
 
-        <?php if (empty($errors) && !empty($senators)): ?>
-                <h3 class="mt-8 text-2xl font-bold text-center">Senators Information:</h3>
-                <div class="flex flex-row  justify-center items-center my-12 gap-8"> 
-                <?php foreach ($senators as $senator): ?>
-                    <div class="mt-4 shadow-sm ">
-                        <h4 class="font-bold"><?= $senator['name'] ?></h4>
-                        <p class="text-sm">Party: <?= $senator['party'] ?></p>
-                        <?php if (!empty($senator['address'])): ?>
-                            <p class="text-sm">Address: <?= $senator['address'][0]->line1 ?>, <?= $senator['address'][0]->city ?>, <?= $senator['address'][0]->state ?>, <?= $senator['address'][0]->zip ?></p>
-                        <?php endif; ?>
-                        <p class="text-sm">Phones: <?= $senator['phones'] ?></p>
-                        <p class="text-sm">Emails: <?= $senator['emails'] ?></p>
-                        <?php if (!empty($senator['photoUrl'])): ?>
-                            <img src="<?= $senator['photoUrl'] ?>" alt="<?= $senator['name'] ?>" class="mt-4 rounded-md max-w-xs">
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-                </div>
 
-        <?php endif; ?> -->
-
-            <?php if (empty($errors) && !empty($senators)): ?>
+    <?php if (empty($errors) && !empty($senators)): ?>
     <section class="bg-gray-100 py-16">
         <div class="container mx-auto px-4">
             <h2 class="text-3xl font-bold mb-8 text-center">Your Representatives</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <?php foreach ($senators as $senator): ?>
                     <div class="bg-white shadow-none rounded-sm overflow-hidden flex flex-col gap-4 p-2">
-                        <div class="relative h-48 w-full">
-                            <!-- <img
-                                src="<?= $senator['photoUrl'] ?? '/placeholder.svg?height=192&width=384' ?>"
-                                alt="<?= $senator['name'] ?>"
-                                class="object-cover w-full h-full"
-                            /> -->
-                            <img src="<?= !empty($senator['photoUrl']) ? $senator['photoUrl'] : 'https://placehold.co/600x400' ?>" alt="Senator Photo" class="object-cover w-full h-full">
+                        <div class="relative h-full w-full">
+                          
+                            <img src="<?= !empty($senator['photoUrl']) ? $senator['photoUrl'] : 'https://placehold.co/600x400' ?>" alt="Senator Photo" class="object-contain w-full h-full">
 
                         </div>
                         <div class="p-4">
@@ -251,6 +220,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </section>
+    <?php else: ?>
+        <section class="bg-gray-100 py-16">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold mb-8 text-center">No Representatives Found</h2>
+                <p class="text-center">No representatives found for the provided address. Please try again with a different address.</p>
+            </div>
+        </section>
 <?php endif; ?>
 
     </main>
