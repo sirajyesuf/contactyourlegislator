@@ -18,17 +18,9 @@ function getSenatorsAndRepresentatives($address) {
 
     // Initialize the Civic Info service
     $civicInfoService = new CivicInfo($client);
-
-    // Define the OCD-ID
-    // $ocdId = 'ocd-division/country:us/state:ga';
-    // $ocdId = 'ocd-division/country:us/state:ca';
-
-    // Make the request to the Civic Information API
-    // $representatives = $civicInfoService->representatives->representativeInfoByDivision($ocdId);
     $representatives = $civicInfoService->representatives->representativeInfoByAddress($address);
 
     // Initialize arrays to hold senators and representatives
-    $senators = [];
     $representativesList = [];
 
     foreach($representatives["officials"] as $official) {

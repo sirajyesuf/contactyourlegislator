@@ -220,7 +220,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </section>
-    <?php else: ?>
+    <?php elseif(empty($errors) & !(empty($street_address) & empty($city) & empty($zipCode))): ?>
         <section class="bg-gray-100 py-16">
             <div class="container mx-auto px-4">
                 <h2 class="text-3xl font-bold mb-8 text-center">No Representatives Found</h2>
