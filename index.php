@@ -2,6 +2,8 @@
 
 require 'senator.php';
 
+$placeholderImage = 'public/georia.png';
+
 function formatAddressWithState($address, $city, $zipCode) {
     // Construct the full address string
     $fullAddress = "$address, $city, $zipCode";
@@ -173,7 +175,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="bg-white shadow-none rounded-sm overflow-hidden flex flex-col gap-4 p-2">
                         <div class="relative h-full w-full">
                           
-                            <img src="<?= !empty($senator['photoUrl']) ? $senator['photoUrl'] : 'https://placehold.co/600x400' ?>" alt="Senator Photo" class="object-contain w-full h-full">
+                            <img src="<?= !empty($senator['photoUrl']) ? $senator['photoUrl'] : $placeholderImage ?>" alt="Senator Photo" class="object-contain w-full h-full">
 
                         </div>
                         <div class="p-4">
@@ -220,14 +222,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </section>
-    <?php elseif(empty($errors) & !(empty($street_address) & empty($city) & empty($zipCode))): ?>
-        <section class="bg-gray-100 py-16">
-            <div class="container mx-auto px-4">
-                <h2 class="text-3xl font-bold mb-8 text-center">No Representatives Found</h2>
-                <p class="text-center">No representatives found for the provided address. Please try again with a different address.</p>
-            </div>
-        </section>
-<?php endif; ?>
+        <?php elseif(empty($errors) & !(empty($street_address) & empty($city) & empty($zipCode))): ?>
+                <section class="bg-gray-100 py-16">
+                    <div class="container mx-auto px-4">
+                        <h2 class="text-3xl font-bold mb-8 text-center">No Representatives Found</h2>
+                        <p class="text-center">No representatives found for the provided address. Please try again with a different address.</p>
+                    </div>
+                </section>
+        <?php endif; ?>
 
     </main>
 
